@@ -19,11 +19,13 @@ graphe::graphe(string cheminVersFichier)
 		cout << "NbNoeuds: " << nbNOEUDS << endl;
 		cout << "Debut: " << DEBUT << endl;
 		cout << "Architecture: ";
+
 		if(architecture == 0) {
 			cout << "BigEndian";
 		} else if (architecture == 1) {
 			cout << "LittleEndian";
 		}
+
 		cout << endl;
 		cout << "----------------------------------------" << endl;
 	}
@@ -42,6 +44,7 @@ void graphe::lire_noeud(uint32_t noeud)
 
 		streampos position = DEBUT + (28 * noeud);
 
+		// Si le noeud n'a jamais été lu, alors il va l'être !
 		if(lesNoeuds[noeud].partieVariable == 0) {
 			DATA.clear();
 			DATA.seekg(position, ios::beg);
@@ -54,20 +57,16 @@ void graphe::lire_noeud(uint32_t noeud)
 				this->lire(lesNoeuds[noeud].futur[i]);
 			}
 
-		} else {
-			cout << "DEBUG: Le noeud # " << noeud << " est déjà présent dans la mémoire." << endl;
 		}
 
-		// Lecture des données variable du noeud (peut être modifié durant l'exécution du programme)
-		DATA.clear();
+		// Lecture des données variable du noeud
 		position = lesNoeuds[noeud].partieVariable;
+		lesNoeuds[noeud].liens.clear(); 	// On va repopuler ce map
+
+		DATA.clear();
 		DATA.seekg(position);
 
-		cout << "Position: " << DATA.tellg() << endl;
 		this->lire(lesNoeuds[noeud].nbArcs);
-		cout << "Position: " << DATA.tellg() << endl;
-
-		lesNoeuds[noeud].liens.clear(); 	// On va repopuler ce map
 		for(int i = 0; i < lesNoeuds[noeud].nbArcs; ++i) {
 			uint32_t numero;
 			float poids;
@@ -75,7 +74,6 @@ void graphe::lire_noeud(uint32_t noeud)
 			this->lire(poids);
 			lesNoeuds[noeud].liens[numero] = poids;
 		}
-
 	}
 }
 
@@ -105,7 +103,7 @@ void graphe::afficher_noeud(uint32_t noeud)
 
 	auto leNoeud = lesNoeuds[noeud];
 
-	cout << "+-----------------------------------------+" << endl;
+	cout << "+--------------------------------------------------------------------+" << endl;
 	cout << " Noeud #" << noeud << endl;
 	cout << " - PartieVariable: " << leNoeud.partieVariable << endl;
 	cout << " - Latitude: " << leNoeud.latitude << endl;
@@ -117,22 +115,5 @@ void graphe::afficher_noeud(uint32_t noeud)
 	for(map<uint32_t, float>::iterator it = leNoeud.liens.begin(); it != leNoeud.liens.end(); ++it) {
 		cout << " -> Arc vers le noeud #" << it->first << " avec un poids de " << it->second << endl;
 	}
-	cout << endl;
+	cout << "+--------------------------------------------------------------------+" << endl;
 }
-
-/*graphe::graphe(string cheminVersFichier)
- {
- DATA.open(cheminVersFichier);
-
- if(!DATA.is_open()) {
- cout << "Fichier inexistant (" << cheminVersFichier << ")" << endl;
- } else {
-
- // Lire le nom du graphe
- while(DATA.read() != ' ') {
- }
-
- // Le nombre de noeuds présent dans le fichier
- DATA >> nbNOEUDS;
- }
- }*/
