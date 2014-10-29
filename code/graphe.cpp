@@ -17,13 +17,19 @@ graphe::graphe(string cheminVersFichier)
 
 		cout << "Nom: " << nom <<endl;
 		cout << "NbNoeuds: " << nbNOEUDS << endl;
-		cout << "Debut: " << DEBUT << endl;
-		cout << "Architecture: ";
+		cout << "Architecture fichier: ";
 
 		if(architecture == 0) {
 			cout << "BigEndian";
 		} else if (architecture == 1) {
 			cout << "LittleEndian";
+		}
+
+		cout << endl << "Architecture machine: ";
+		if(this->architectureMachine() == __LITTLE_ENDIAN) {
+			cout << "LittleEndian";
+		} else {
+			cout << "BigEndian";
 		}
 
 		cout << endl;
@@ -41,58 +47,77 @@ graphe::~graphe()
 void graphe::lire_noeud(uint32_t noeud)
 {
 	if(noeud < nbNOEUDS) {
-
-		streampos position = DEBUT + (28 * noeud);
-
-		// Si le noeud n'a jamais été lu, alors il va l'être !
+		// Si le noeud n'a jamais Ã©tÃ© lu, alors il va l'Ãªtre !
 		if(lesNoeuds[noeud].partieVariable == 0) {
 			DATA.clear();
-			DATA.seekg(position, ios::beg);
+			DATA.seekg(DEBUT + (28 * noeud), ios::beg);
 
-			// Lecture des données statiques du noeud
+			// Lecture des donnÃ©es statiques du noeud
 			this->lire(lesNoeuds[noeud].partieVariable);
 			this->lire(lesNoeuds[noeud].latitude);
 			this->lire(lesNoeuds[noeud].longitude);
+
 			for(int i = 0; i < 4; ++i) {
 				this->lire(lesNoeuds[noeud].futur[i]);
 			}
 
-		}
+			// Lecture des donnÃ©es variable du noeud
+			DATA.clear();
+			DATA.seekg(lesNoeuds[noeud].partieVariable);
 
-		// Lecture des données variable du noeud
-		position = lesNoeuds[noeud].partieVariable;
-		lesNoeuds[noeud].liens.clear(); 	// On va repopuler ce map
-
-		DATA.clear();
-		DATA.seekg(position);
-
-		this->lire(lesNoeuds[noeud].nbArcs);
-		for(int i = 0; i < lesNoeuds[noeud].nbArcs; ++i) {
-			uint32_t numero;
-			float poids;
-			this->lire(numero);
-			this->lire(poids);
-			lesNoeuds[noeud].liens[numero] = poids;
-		}
+			this->lire(lesNoeuds[noeud].nbArcs);
+			for(int i = 0; i < lesNoeuds[noeud].nbArcs; ++i) {
+				uint32_t numero;
+				float poids;
+				this->lire(numero);
+				this->lire(poids);
+				lesNoeuds[noeud].liens[numero] = poids;
+		  }
+	  }
 	}
 }
 
 void graphe::lire(uint16_t& noeud)
 {
 	DATA.read(reinterpret_cast<char*>(&noeud), 2);
+
+	// Si l'architecture diffÃ¨re du fichier, on swap les bits.
+	int architectureMachine = this->architectureMachine();
+	if((architecture == 1 && architectureMachine != __LITTLE_ENDIAN) ||
+		(architecture == 0 && architectureMachine != __BIG_ENDIAN)) {
+			// http://stackoverflow.com/a/2182184
+			noeud = (noeud >> 8) | (noeud << 8);
+	}
 }
 
 void graphe::lire(uint32_t& noeud)
 {
 	DATA.read(reinterpret_cast<char*>(&noeud), 4);
+
+	// Si l'architecture diffÃ¨re du fichier, on swap les bits.
+	int architectureMachine = this->architectureMachine();
+	if((architecture == 1 && architectureMachine != __LITTLE_ENDIAN) ||
+		(architecture == 0 && architectureMachine != __BIG_ENDIAN)) {
+			// http://stackoverflow.com/a/13001420
+			noeud = (noeud >> 24) | ((noeud << 8) & 0x00FF0000) | ((noeud >> 8) & 0x0000FF00) | (noeud << 24);
+	}
 }
 
 void graphe::lire(float& a)
 {
-	DATA.read(reinterpret_cast<char*>(&a), sizeof(float));
+	DATA.read(reinterpret_cast<char*>(&a), 4);
+
+	// Si l'architecture diffÃ¨re du fichier, on swap les bits.
+	int architectureMachine = this->architectureMachine();
+	if((architecture == 1 && architectureMachine != __LITTLE_ENDIAN) ||
+		(architecture == 0 && architectureMachine != __BIG_ENDIAN)) {
+			char *floatToConvert = ( char* ) & a; // http://stackoverflow.com/a/2782742
+			swap(floatToConvert[0], floatToConvert[3]);
+			swap(floatToConvert[1], floatToConvert[2]);
+	}
 }
 
-uint32_t graphe::size() const
+const uint32_t graphe::size() const
 {
 	return this->nbNOEUDS;
 }
@@ -116,4 +141,11 @@ void graphe::afficher_noeud(uint32_t noeud)
 		cout << " -> Arc vers le noeud #" << it->first << " avec un poids de " << it->second << endl;
 	}
 	cout << "+--------------------------------------------------------------------+" << endl;
+}
+
+const int graphe::architectureMachine() const
+{
+	short int word = 0x0001;
+	char *byte = (char *) &word;
+	return(byte[0] ? __LITTLE_ENDIAN : __BIG_ENDIAN);
 }

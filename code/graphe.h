@@ -8,39 +8,94 @@
 
 using namespace std;
 
-class graphe {
-private:
-  struct arc {
-    uint16_t numero;
-  };
-  struct noeud {                   // Description de toutes les composantes d'un noeud
-	  // Statique
-    uint32_t partieVariable;
-	  float	latitude;
-	  float longitude;
-	  uint32_t futur[4];             // Autres trucs pour un usage futur
+class graphe
+{
+  private:
 
-    // Variable
-    uint16_t nbArcs;               // Nombre d'arcs
-    map<uint32_t, float> liens;    // Liens entre ce noeud et d'autres noeuds
-  };
-  map<uint32_t, noeud> lesNoeuds; // Les noeuds deja lus
-  uint32_t nbNOEUDS;              // Le nombre de noeuds
-  ifstream DATA;                  // Le flot d'entrée
-  uint32_t DEBUT;                 // Debut de la partie fixe
-  string nom;				              // Nom du graphe
-  uint8_t architecture;           // Architecture du fichier (Little or Big endian)
+    struct noeud  // Description de toutes les composantes d'un noeud
+    {
+      // Partie statique
+      uint32_t partieVariable;
+      float latitude;
+      float longitude;
+      uint32_t futur[4];            // Autres trucs pour un usage futur
 
-  void lire_noeud(uint32_t noeud);
-  void lire(uint16_t& noeud);           // Fonction utilitaire de lecture binaire
-  void lire(uint32_t& noeud);           // qui dépendent de l'architecture
-  void lire(float& a);
-  graphe(const graphe& graphe)=delete;            // Copieur
-  graphe& operator=(const graphe& graphe)=delete; // affectateur désésactivés
+      // Partie variable
+      uint16_t nbArcs;              // Nombre d'arcs
+      map<uint32_t, float> liens;   // Liens entre ce noeud et d'autres noeuds
+    };
 
-public:
-  graphe(string cheminVersFichier);                   // Constructeur
-  ~graphe();                        // Destructeur
-  uint32_t size()const;             // Nombre de noeuds dans le graphe
-  void afficher_noeud(uint32_t noeud);    // Afficher toutes les informations sur un noeud
+    map<uint32_t, noeud> lesNoeuds;   // Les noeuds deja lus
+    uint32_t nbNOEUDS;                // Le nombre de noeuds
+    ifstream DATA;                    // Le flot d'entrée
+    uint32_t DEBUT;                   // Debut de la partie fixe
+    string nom;                       // Nom du graphe
+    uint8_t architecture;             // Architecture du fichier (Little or Big endian)
+
+    /**
+     * Lire le noeud avec le numéro donné en paramètre.
+     * @param noeud Numéro du noeud a lire dans le fichier et a charger en mémoire.
+     */
+    void lire_noeud(uint32_t noeud);
+
+    /**
+     * Lire un uint32_t à la position courante de DATA. (4 octets)
+     * @param noeud variable a extraire du fichier.
+     */
+    void lire(uint32_t& noeud);
+
+    /**
+     * Lire un uint16_t à la position courante de DATA. (2 octets)
+     * @param noeud variable à extraire du fichier.
+     */
+    void lire(uint16_t& noeud);
+
+    /**
+     * Lire un float à la position courante de DATA. (4 octets)
+     * @param a variable à extraire du fichier.
+     */
+    void lire(float& a);
+
+    /**
+     * Constructeur par copie.
+     */
+    graphe(const graphe &graphe)=delete;
+
+    /**
+     * Désactiver l'opérateur =. Il vaut mieux utiliser le constructeur par copie.
+     */
+    graphe& operator=(const graphe &graphe)=delete;
+
+    /**
+     * Vérifie quel est l'architecture de la machine exécutant ce code.
+     * Trouvé sur : http://stackoverflow.com/a/1001344
+     * @return int 4321 = BigEndian, 1234 = LittleEndian.
+     */
+    const int architectureMachine() const;
+
+  public:
+
+    /**
+     * Constructeur.
+     * @param: cheminVersFichier Chemin vers le fichier contenant le graphe a lire.
+     */
+    graphe(string cheminVersFichier);
+
+    /**
+     * Destructeur. Va fermer le fichier contenant le graphe.
+     */
+    ~graphe();
+
+    /**
+     * Retourne le nombre de noeud dans le fichier du graphe.
+     * @return uint32_t Nombre de noeuds.
+     */
+    const uint32_t size() const;
+
+    /**
+     * Afficher le noeud avec le numéro donné en paramètre.
+     * S'il n'est pas en mémoire, ce dernier va être lu.
+     * @param noeud numéro du noeud a afficher.
+     */
+    void afficher_noeud(uint32_t noeud);
 };
