@@ -149,3 +149,8 @@ const int graphe::architectureMachine() const
 	char *byte = (char *) &word;
 	return(byte[0] ? __LITTLE_ENDIAN : __BIG_ENDIAN);
 }
+
+void graphe::trouver_chemin_optimal(uint32_t premierNoeud, uint32_t secondNoeud)
+{
+
+}

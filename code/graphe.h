@@ -98,4 +98,11 @@ class graphe
      * @param noeud numéro du noeud a afficher.
      */
     void afficher_noeud(uint32_t noeud);
+
+    /**
+     * Trouve et affiche le chemin le plus optimal entre les 2 noeuds.
+     * @param premierNoeud Numéro du premier noeud.
+     * @param secondNoeud  Numéro du second noeud.
+     */
+    void trouver_chemin_optimal(uint32_t premierNoeud, uint32_t secondNoeud);
 };
