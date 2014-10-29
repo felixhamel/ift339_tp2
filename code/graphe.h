@@ -10,15 +10,19 @@ using namespace std;
 
 class graphe {
 private:
+  struct arc {
+    uint16_t numero;
+  };
   struct noeud {                   // Description de toutes les composantes d'un noeud
 	  // Statique
     uint32_t partieVariable;
 	  float	latitude;
 	  float longitude;
-	  uint32_t futur[4]; // Autres trucs pour un usage futur
+	  uint32_t futur[4];             // Autres trucs pour un usage futur
 
     // Variable
-    
+    uint16_t nbArcs;               // Nombre d'arcs
+    map<uint32_t, float> liens;    // Liens entre ce noeud et d'autres noeuds
   };
   map<uint32_t, noeud> lesNoeuds; // Les noeuds deja lus
   uint32_t nbNOEUDS;              // Le nombre de noeuds
