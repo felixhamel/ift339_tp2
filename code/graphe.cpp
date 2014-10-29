@@ -47,12 +47,12 @@ graphe::~graphe()
 void graphe::lire_noeud(uint32_t noeud)
 {
 	if(noeud < nbNOEUDS) {
-		// Si le noeud n'a jamais Ã©tÃ© lu, alors il va l'Ãªtre !
+		// Si le noeud n'a jamais été lu, alors il va l'être !
 		if(lesNoeuds[noeud].partieVariable == 0) {
 			DATA.clear();
 			DATA.seekg(DEBUT + (28 * noeud), ios::beg);
 
-			// Lecture des donnÃ©es statiques du noeud
+			// Lecture des données statiques du noeud
 			this->lire(lesNoeuds[noeud].partieVariable);
 			this->lire(lesNoeuds[noeud].latitude);
 			this->lire(lesNoeuds[noeud].longitude);
@@ -61,7 +61,7 @@ void graphe::lire_noeud(uint32_t noeud)
 				this->lire(lesNoeuds[noeud].futur[i]);
 			}
 
-			// Lecture des donnÃ©es variable du noeud
+			// Lecture des données variable du noeud
 			DATA.clear();
 			DATA.seekg(lesNoeuds[noeud].partieVariable);
 
@@ -81,7 +81,7 @@ void graphe::lire(uint16_t& noeud)
 {
 	DATA.read(reinterpret_cast<char*>(&noeud), 2);
 
-	// Si l'architecture diffÃ¨re du fichier, on swap les bits.
+	// Si l'architecture diffère du fichier, on swap les bits.
 	int architectureMachine = this->architectureMachine();
 	if((architecture == 1 && architectureMachine != __LITTLE_ENDIAN) ||
 		(architecture == 0 && architectureMachine != __BIG_ENDIAN)) {
@@ -94,7 +94,7 @@ void graphe::lire(uint32_t& noeud)
 {
 	DATA.read(reinterpret_cast<char*>(&noeud), 4);
 
-	// Si l'architecture diffÃ¨re du fichier, on swap les bits.
+	// Si l'architecture diffère du fichier, on swap les bits.
 	int architectureMachine = this->architectureMachine();
 	if((architecture == 1 && architectureMachine != __LITTLE_ENDIAN) ||
 		(architecture == 0 && architectureMachine != __BIG_ENDIAN)) {
@@ -107,7 +107,7 @@ void graphe::lire(float& a)
 {
 	DATA.read(reinterpret_cast<char*>(&a), 4);
 
-	// Si l'architecture diffÃ¨re du fichier, on swap les bits.
+	// Si l'architecture diffère du fichier, on swap les bits.
 	int architectureMachine = this->architectureMachine();
 	if((architecture == 1 && architectureMachine != __LITTLE_ENDIAN) ||
 		(architecture == 0 && architectureMachine != __BIG_ENDIAN)) {
