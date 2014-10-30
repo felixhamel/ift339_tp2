@@ -1,5 +1,7 @@
 #include "graphe.h"
 
+#include <set>
+
 graphe::graphe(string cheminVersFichier)
 {
 	DATA.open(cheminVersFichier.c_str(), ios::in|ios::binary);
@@ -152,5 +154,66 @@ const int graphe::architectureMachine() const
 
 void graphe::trouver_chemin_optimal(uint32_t premierNoeud, uint32_t secondNoeud)
 {
+	map<uint32_t, uint32_t> predecesseurs;			// Noeud, prédécesseur du noeud
+	map<uint32_t, float> total;								// Noeud, poids
+	multimap<float, uint32_t> totalInverse;		// Poids, Noeuds
+	set<uint32_t> noeudObserve;								// Les noeuds déjà observés
+
+  uint32_t noeudCourant = premierNoeud;
+	total[premierNoeud] = 0;
+	totalInverse.insert(pair<float, uint32_t>(0, premierNoeud));
+
+  int compteur = 0;
+	while(noeudCourant != secondNoeud) {
+
+			// Aller chercher le noeud avec le poids le plus petit en partant
+			while(noeudObserve.find(noeudCourant) != noeudObserve.end()) {
+				cout << "###### NC: " << noeudCourant << endl;
+				noeudCourant = totalInverse.begin()->second;
+				totalInverse.erase(totalInverse.begin());
+			}
+
+			if(noeudCourant == secondNoeud) {
+				cout << "Chemin trouvé !" << endl;
+				break;
+			}
+
+			totalInverse.erase(totalInverse.begin());
+			noeudObserve.insert(noeudCourant);
+			this->lire_noeud(noeudCourant);
+			noeud noeud = lesNoeuds[noeudCourant];
+			cout << "Noeud Courant : " << noeudCourant << " | Prédécesseur: " << predecesseurs[noeudCourant] << endl;
+
+			for(map<uint32_t, float>::iterator it = noeud.liens.begin(); it != noeud.liens.end(); ++it) {
+
+				cout << "Noeud: " << it->first << " | Poids: " << (it->second + total[noeudCourant]) << endl;
+				// On conserve seulement le chemin avec le plus petit poids
+				if(total[it->first] > (it->second + total[noeudCourant]) || total[it->first] == 0) {
+					cout << " -> Mise à jour prédécesseur # Noeud: " << it->first << " | Ancien: " << predecesseurs[noeudCourant] << " | Nouveau: " << noeudCourant << endl;
+					total[it->first] = it->second + total[noeudCourant];
+					totalInverse.insert(pair<float, uint32_t>(it->second + total[noeudCourant], it->first));
+					predecesseurs[it->first] = noeudCourant;
+				}
+
+			}
+
+			cout << "TotalInverse Noeud: " << totalInverse.begin()->second << " | Poids: " << totalInverse.begin()->first << endl;
+
+			/*for(multimap<float, uint32_t>::iterator it = totalInverse.begin(); it != totalInverse.end(); ++it)
+			{
+				cout << "TotalInverse Noeud: " << it->second << " | Poids: " << it->first << endl;
+			}*/
+
+			cout << "# ------------------------------------ #" << endl;
+			compteur++;
+
+	}
+
+	cout << "Compteur !: " << compteur << endl;
+
+  cout << "Affichage des noeuds" << endl;
+	for(map<uint32_t, uint32_t>::iterator it = predecesseurs.begin(); it != predecesseurs.end(); ++it) {
+		cout << "Noeud: " << it->first << " <- " << it->second << endl;
+	}
 
 }
