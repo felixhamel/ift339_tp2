@@ -3,8 +3,8 @@ IFT339 - TP2 partie 2
 
 Partie 2 du TP2 du cours IFT339.
 
-Pour accéder à la partie 1 du TP, aller sur la branche nommée partie1.
+Pour accÃ©der Ã  la partie 1 du TP, allez sur la branche nommÃ©e partie1.
 
-Université de Sherbrooke - Automne 2014.
+UniversitÃ© de Sherbrooke - Automne 2014.
 
-Voir l'énoncé pour plus de détails.
+Voir l'Ã©noncÃ© pour plus de dÃ©tails.
