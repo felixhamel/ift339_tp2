@@ -23,6 +23,7 @@ class graphe
       // Partie variable
       uint16_t nbArcs;              // Nombre d'arcs
       map<uint32_t, float> liens;   // Liens entre ce noeud et d'autres noeuds
+      string nom;                   // Nom du noeud
     };
 
     map<uint32_t, noeud> lesNoeuds;   // Les noeuds deja lus

@@ -4,27 +4,30 @@ using namespace std;
 
 /**
  * Main function.
- * @return [description]
+ * @return code de sortie du programme.
  */
 int main()
 {
-  cout << "Veuillez entrer le nom du fichier a ouvrir : ";
-
   string nomFichier;
+
+  cout << "Veuillez entrer le nom du fichier a ouvrir : ";
   cin >> nomFichier;
 
   // Création du graphe
   graphe dijkstra(nomFichier);
 
+  uint16_t premierNoeud = -1;
+  uint16_t secondNoeud = -1;
+
   while(true) {
-    uint16_t premierNoeud = 0;
-    uint16_t secondNoeud = 0;
-
-    cout << "Entrez le numéro du premier noeud : ";
-    cin >> premierNoeud;
-    cout << "Entrez le numéro du deuxième noeud : ";
-    cin >> secondNoeud;
-
+    do {
+      cout << "Entrez le numéro du premier noeud : ";
+      cin >> premierNoeud;
+    } while(premierNoeud < 0 || premierNoeud >= dijkstra.size());
+    do {
+      cout << "Entrez le numéro du deuxième noeud : ";
+      cin >> secondNoeud;
+    } while(secondNoeud < 0 || secondNoeud >= dijkstra.size());
     dijkstra.trouver_chemin_optimal(premierNoeud, secondNoeud);
   }
 }
