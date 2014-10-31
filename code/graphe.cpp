@@ -149,7 +149,7 @@ void graphe::afficher_noeud(uint32_t noeud)
 	cout << " - Longitude: " << leNoeud.longitude << endl;
 	cout << " - Nom: " << leNoeud.nom << endl;
 	for(int i = 0; i < 4; ++i) {
-		cout << " -> Future[" << i << "]: " << leNoeud.futur[i] << endl;
+		cout << " -> Futur[" << i << "]: " << leNoeud.futur[i] << endl;
 	}
 	cout << " - Nombre d'arcs: " << leNoeud.nbArcs << endl;
 	for(map<uint32_t, float>::iterator it = leNoeud.liens.begin(); it != leNoeud.liens.end(); ++it) {
