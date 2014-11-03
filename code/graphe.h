@@ -60,12 +60,12 @@ class graphe
     /**
      * Constructeur par copie.
      */
-    graphe(const graphe &graphe)=delete;
+    //graphe(const graphe &graphe)=delete;
 
     /**
      * Désactiver l'opérateur =. Il vaut mieux utiliser le constructeur par copie.
      */
-    graphe& operator=(const graphe &graphe)=delete;
+    //graphe& operator=(const graphe &graphe)=delete;
 
     /**
      * Vérifie quel est l'architecture de la machine exécutant ce code.
@@ -73,6 +73,8 @@ class graphe
      * @return int 4321 = BigEndian, 1234 = LittleEndian.
      */
     const int architectureMachine() const;
+
+    void afficher_chemin (map<uint32_t, float>&, map<uint32_t, uint32_t>&, uint32_t, uint32_t);
 
   public:
 

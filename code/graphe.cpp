@@ -3,6 +3,7 @@
 #include <set>
 #include <chrono>
 #include <ctime>
+#include <vector>
 
 graphe::graphe(string cheminVersFichier)
 {
@@ -85,6 +86,7 @@ void graphe::lire_noeud(uint32_t noeud)
 			char* nom = new char[nombreDeCaracteres];
 			DATA.read(nom, nombreDeCaracteres);
 			lesNoeuds[noeud].nom = nom;
+			lesNoeuds[noeud].nom = lesNoeuds[noeud].nom.substr(0, nombreDeCaracteres-1);
 
 			delete nom;
 	  }
@@ -147,7 +149,7 @@ void graphe::afficher_noeud(uint32_t noeud)
 	cout << " - PartieVariable: " << leNoeud.partieVariable << endl;
 	cout << " - Latitude: " << leNoeud.latitude << endl;
 	cout << " - Longitude: " << leNoeud.longitude << endl;
-	cout << " - Nom: " << leNoeud.nom << endl;
+	cout << " - Nom: " << leNoeud.nom << " - " << hex << leNoeud.nom << " - " << leNoeud.nom.length() << endl;
 	for(int i = 0; i < 4; ++i) {
 		cout << " -> Futur[" << i << "]: " << leNoeud.futur[i] << endl;
 	}
@@ -165,6 +167,43 @@ const int graphe::architectureMachine() const
 	return(byte[0] ? __LITTLE_ENDIAN : __BIG_ENDIAN);
 }
 
+void graphe::afficher_chemin(map<uint32_t, float>& total, map<uint32_t, uint32_t>& pred, uint32_t premier, uint32_t dernier)
+{
+    vector<uint32_t> cheminInverse;
+    vector<double> poidsInverse;
+    string nomCourant;
+    uint32_t noeudCourant = dernier;
+
+    while (noeudCourant != premier) {
+        //uint32_t avant = pred[noeudCourant];
+
+        //insere de l'arrivee au debut le chemin a prendre et le poids correspondant a chaque arrete empruntee
+        cheminInverse.push_back(noeudCourant);
+        poidsInverse.push_back(total[noeudCourant]-total[pred[noeudCourant]]);
+
+        noeudCourant = pred[noeudCourant];
+    }
+
+    cheminInverse.push_back(premier);
+    poidsInverse.push_back(0);
+
+		float poidsTotal = 0.f;
+
+    for (size_t i = cheminInverse.size(); i >= 1; --i) {
+        int positionCourante = i - 1;
+
+				// Lire le noeud au cas où il ne serait pas en mémoire.
+				this->lire_noeud(cheminInverse[positionCourante]);
+
+				nomCourant = lesNoeuds[cheminInverse[positionCourante]].nom;
+				poidsTotal += poidsInverse[positionCourante];
+
+				cout << " <=> " << nomCourant << " " << poidsInverse[positionCourante] << endl;
+    }
+
+		cout << "Poids total : " << poidsTotal << endl;
+}
+
 void graphe::trouver_chemin_optimal(uint32_t premierNoeud, uint32_t secondNoeud)
 {
 	map<uint32_t, uint32_t> predecesseurs;			// Noeud, prédécesseur du noeud
@@ -172,6 +211,7 @@ void graphe::trouver_chemin_optimal(uint32_t premierNoeud, uint32_t secondNoeud)
 	multimap<float, uint32_t> totalInverse;		  // Poids, Noeuds
 	set<uint32_t> noeudsObserve;								// Les noeuds déjà observés
   uint32_t noeudCourant = premierNoeud;
+	float poidsTotal = 0.f;											// Calculer le poids total
 
 	// On va ajouter 0 dans le total et le total inversé afin d'éviter de faire du
 	// code custom juste pour la première boucle.
@@ -232,6 +272,7 @@ void graphe::trouver_chemin_optimal(uint32_t premierNoeud, uint32_t secondNoeud)
 
 	}
 
+	afficher_chemin (total, predecesseurs, premierNoeud, secondNoeud);
 	// On veut savoir le temps qu'a pris la méthode pour trouver le chemin le
 	// plus optimal.
 	fin = chrono::system_clock::now();
