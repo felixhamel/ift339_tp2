@@ -1,1 +1,1 @@
-g++ -std=c++11 tp2.cpp graphe.cpp -o tp2_partie2
+g++ -std=c++11 main.cpp graphe.cpp -o tp2_partie2

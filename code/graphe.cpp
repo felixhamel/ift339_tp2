@@ -4,48 +4,21 @@
 #include <chrono>
 #include <ctime>
 #include <vector>
+#include <deque>
 
 graphe::graphe(string cheminVersFichier)
 {
 	DATA.open(cheminVersFichier.c_str(), ios::in|ios::binary);
+
 	if(!DATA.is_open()) {
 		cout << "Erreur d'ouverture du fichier, celui-ci n'existe pas." << endl;
 		exit(1);
-	} else {
-		DATA >> nom;
-		DATA.ignore(1);
-		DATA >> nbNOEUDS;
-		DATA.ignore(1);
-		DATA >> architecture;
-		DATA.ignore(1);
-
-		DEBUT = DATA.tellg();
-
-// Afficher une description du graphe si on est en debug
-#ifdef _DEBUG
-		cout << "Description du graphe : " << endl;
-		cout << "Nom: " << nom <<endl;
-		cout << "NbNoeuds: " << nbNOEUDS << endl;
-		cout << "Architecture fichier: ";
-
-		if(architecture == 0) {
-			cout << "BigEndian";
-		} else if (architecture == 1) {
-			cout << "LittleEndian";
-		}
-
-		cout << endl << "Architecture machine: ";
-		if(this->architectureMachine() == __LITTLE_ENDIAN) {
-			cout << "LittleEndian";
-		} else {
-			cout << "BigEndian";
-		}
-
-		cout << endl;
-		cout << "----------------------------------------" << endl;
-#endif
-
 	}
+
+	DATA >> nom >> nbNOEUDS >> architecture;
+	DATA.ignore(1);
+
+	DEBUT = DATA.tellg();
 }
 
 graphe::~graphe()
@@ -146,7 +119,6 @@ void graphe::afficher_noeud(uint32_t noeud)
 
 	cout << "+--------------------------------------------------------------------+" << endl;
 	cout << " Noeud #" << noeud << endl;
-	cout << " - PartieVariable: " << leNoeud.partieVariable << endl;
 	cout << " - Latitude: " << leNoeud.latitude << endl;
 	cout << " - Longitude: " << leNoeud.longitude << endl;
 	cout << " - Nom: " << leNoeud.nom << " - " << hex << leNoeud.nom << " - " << leNoeud.nom.length() << endl;
@@ -167,44 +139,7 @@ const int graphe::architectureMachine() const
 	return(byte[0] ? __LITTLE_ENDIAN : __BIG_ENDIAN);
 }
 
-void graphe::afficher_chemin(map<uint32_t, float>& total, map<uint32_t, uint32_t>& pred, uint32_t premier, uint32_t dernier)
-{
-    vector<uint32_t> cheminInverse;
-    vector<double> poidsInverse;
-    string nomCourant;
-    uint32_t noeudCourant = dernier;
-
-    while (noeudCourant != premier) {
-        //uint32_t avant = pred[noeudCourant];
-
-        //insere de l'arrivee au debut le chemin a prendre et le poids correspondant a chaque arrete empruntee
-        cheminInverse.push_back(noeudCourant);
-        poidsInverse.push_back(total[noeudCourant]-total[pred[noeudCourant]]);
-
-        noeudCourant = pred[noeudCourant];
-    }
-
-    cheminInverse.push_back(premier);
-    poidsInverse.push_back(0);
-
-		float poidsTotal = 0.f;
-
-    for (size_t i = cheminInverse.size(); i >= 1; --i) {
-        int positionCourante = i - 1;
-
-				// Lire le noeud au cas où il ne serait pas en mémoire.
-				this->lire_noeud(cheminInverse[positionCourante]);
-
-				nomCourant = lesNoeuds[cheminInverse[positionCourante]].nom;
-				poidsTotal += poidsInverse[positionCourante];
-
-				cout << " <=> " << nomCourant << " " << poidsInverse[positionCourante] << endl;
-    }
-
-		cout << "Poids total : " << poidsTotal << endl;
-}
-
-void graphe::trouver_chemin_optimal(uint32_t premierNoeud, uint32_t secondNoeud)
+void graphe::trouver_chemin_optimal(const uint32_t premierNoeud, const uint32_t secondNoeud)
 {
 	map<uint32_t, uint32_t> predecesseurs;			// Noeud, prédécesseur du noeud
 	map<uint32_t, float> total;								  // Noeud, poids
@@ -226,56 +161,82 @@ void graphe::trouver_chemin_optimal(uint32_t premierNoeud, uint32_t secondNoeud)
 	// le premier noeud et le deuxième.
 	while(noeudCourant != secondNoeud) {
 
-			// Aller chercher le noeud avec le poids le plus petit en partant
-			while(noeudsObserve.find(noeudCourant) != noeudsObserve.end() && totalInverse.size() > 0) {
-				noeudCourant = totalInverse.begin()->second;
-				totalInverse.erase(totalInverse.begin());
-			}
-
-			// Si TotalInverse est vide et qu'on n'est plus sur le premier noeud,
-			// alors on a fait le tour du graphe et on peut maintenant savoir le
-			// chemin le plus efficace à l'aide du map des prédécesseurs.
-			if(totalInverse.size() == 0 && noeudCourant != premierNoeud) {
-				break;
-			}
-
-			// Puisqu'on a trouvé un noeud qu'on a pas encore parcouru, on l'ajoute a
-			// la liste des noeuds parcourus et on le retire de TotalInverse.
-			noeudsObserve.insert(noeudCourant);
+		// Aller chercher le noeud avec le poids le plus petit en partant
+		while(noeudsObserve.find(noeudCourant) != noeudsObserve.end() && totalInverse.size() > 0) {
+			noeudCourant = totalInverse.begin()->second;
 			totalInverse.erase(totalInverse.begin());
+		}
+		this->lire_noeud(noeudCourant);
 
-			// Si on est rendu au noeud qu'on voulait trouver, on a trouvé le chemin
-			// le plus optimal !
-			if(noeudCourant != secondNoeud) {
-				this->lire_noeud(noeudCourant);
-				//cout << "Noeud Courant : " << noeudCourant << " | Prédécesseur: " << predecesseurs[noeudCourant] << endl;
+		// Si TotalInverse est vide et qu'on n'est plus sur le premier noeud,
+		// alors on a fait le tour du graphe et on peut maintenant savoir le
+		// chemin le plus efficace à l'aide du map des prédécesseurs.
+		if(totalInverse.size() == 0 && noeudCourant != premierNoeud) break;
 
-				for(map<uint32_t, float>::iterator it = lesNoeuds[noeudCourant].liens.begin(); it != lesNoeuds[noeudCourant].liens.end(); ++it) {
+		// Puisqu'on a trouvé un noeud qu'on a pas encore parcouru, on l'ajoute a
+		// la liste des noeuds parcourus et on le retire de TotalInverse.
+		noeudsObserve.insert(noeudCourant);
+		//totalInverse.erase(totalInverse.begin());
 
-					// On conserve seulement le chemin avec le plus petit poids
-					float poidsTotal = it->second + total[noeudCourant];
-					//cout << "Noeud: " << it->first << " | Poids: " << poidsTotal << endl;
+		// Si on est rendu au noeud qu'on voulait trouver, on a trouvé le chemin
+		// le plus optimal !
+		if(noeudCourant != secondNoeud) {
+			for(map<uint32_t, float>::iterator it = lesNoeuds[noeudCourant].liens.begin(); it != lesNoeuds[noeudCourant].liens.end(); ++it) {
 
-					if(total[it->first] == 0 || total[it->first] > poidsTotal) {
-						//cout << " -> Mise à jour prédécesseur # Noeud: " << it->first << " | Ancien: " << predecesseurs[noeudCourant] << " | Nouveau: " << noeudCourant << endl;
-						total[it->first] = poidsTotal;
-						totalInverse.insert(pair<float, uint32_t>(poidsTotal, it->first));
-						predecesseurs[it->first] = noeudCourant;
-					}
+				// On conserve seulement le chemin avec le plus petit poids
+				float poidsTotal = it->second + total[noeudCourant];
+				if(total[it->first] == 0 || total[it->first] > poidsTotal) {
+					total[it->first] = poidsTotal;
+					totalInverse.insert(pair<float, uint32_t>(poidsTotal, it->first));
+					predecesseurs[it->first] = noeudCourant;
 				}
-
-				/*for(multimap<float, uint32_t>::iterator it = totalInverse.begin(); it != totalInverse.end(); ++it) {
-					cout << "TotalInverse Noeud: " << it->second << " | Poids: " << it->first << endl;
-				}
-				cout << "# ------------------------------------ #" << endl;*/
 			}
-
+		}
 	}
 
-	afficher_chemin (total, predecesseurs, premierNoeud, secondNoeud);
 	// On veut savoir le temps qu'a pris la méthode pour trouver le chemin le
 	// plus optimal.
 	fin = chrono::system_clock::now();
 	chrono::duration<double> tempsEcoule = fin - debut;
-	cout << "Temps pour trouvé le meilleur chemin = " << tempsEcoule.count() << "s." << endl;
+
+	// Afficher le chemin qu'on vient de trouver.
+	afficher_chemin(predecesseurs, premierNoeud, secondNoeud);
+
+	// Afficher le temps
+	cout << " - Temps pour trouver le meilleur chemin : " << fixed << tempsEcoule.count() << "s." << endl << endl;
+	cout.unsetf(ios_base::fixed);
+}
+
+void graphe::afficher_chemin(map<uint32_t, uint32_t>& predecesseurs, const uint32_t& premierNoeud, const uint32_t& secondNoeud)
+{
+	// Calculer le poids total
+	float poidsTotal = 0.f;
+	deque<uint32_t> cheminNormal;
+
+	// On va remettre le chemin en ordre du début jusqu'à la fin.
+	uint32_t noeudCourant = secondNoeud;
+	while(noeudCourant != premierNoeud) {
+		cheminNormal.push_front(noeudCourant);
+		noeudCourant = predecesseurs[noeudCourant];
+	}
+	cheminNormal.push_front(premierNoeud);
+
+	// Afficher le chemin
+	noeud* ptrNoeudPrecedent = nullptr;
+	noeud* ptrNoeudCourant = nullptr;
+
+	for(size_t i = 0; i < cheminNormal.size(); ++i) {
+		ptrNoeudCourant = &lesNoeuds[cheminNormal[i]];
+
+		if(i > 0) {
+			// Retrouver le poids du lien entre les deux noeuds
+			poidsTotal += ptrNoeudPrecedent->liens[cheminNormal[i]];
+			cout << " " << ptrNoeudPrecedent->nom << " <=> " << ptrNoeudCourant->nom;
+			cout << " | Poids du lien : " << ptrNoeudPrecedent->liens[cheminNormal[i]] << endl;
+		}
+
+		ptrNoeudPrecedent = ptrNoeudCourant;
+	}
+	cout << " #-------------------------------------------------------------------------" << endl;
+	cout << " - Poids total du chemin le plus court : " << poidsTotal << endl;
 }

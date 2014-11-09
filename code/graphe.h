@@ -74,7 +74,13 @@ class graphe
      */
     const int architectureMachine() const;
 
-    void afficher_chemin (map<uint32_t, float>&, map<uint32_t, uint32_t>&, uint32_t, uint32_t);
+    /**
+     * Afficher le chemin trouvé.
+     * @param predecesseurs [description]
+     * @param premierNoeud  [description]
+     * @param secondNoeud   [description]
+     */
+    void afficher_chemin(map<uint32_t, uint32_t>& predecesseurs, const uint32_t& premierNoeud, const uint32_t& secondNoeud);
 
   public:
 
@@ -107,5 +113,5 @@ class graphe
      * @param premierNoeud Numéro du premier noeud.
      * @param secondNoeud  Numéro du second noeud.
      */
-    void trouver_chemin_optimal(uint32_t premierNoeud, uint32_t secondNoeud);
+    void trouver_chemin_optimal(const uint32_t premierNoeud, const uint32_t secondNoeud);
 };
