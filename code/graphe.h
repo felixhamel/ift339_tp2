@@ -76,9 +76,9 @@ class graphe
 
     /**
      * Afficher le chemin trouvé.
-     * @param predecesseurs [description]
-     * @param premierNoeud  [description]
-     * @param secondNoeud   [description]
+     * @param predecesseurs Predecesseurs de chaque noeud (le plus optimal)
+     * @param premierNoeud  Le premier noeud
+     * @param secondNoeud   Le dernier noeud du chemin
      */
     void afficher_chemin(map<uint32_t, uint32_t>& predecesseurs, const uint32_t& premierNoeud, const uint32_t& secondNoeud);
 
@@ -88,7 +88,7 @@ class graphe
      * Constructeur.
      * @param: cheminVersFichier Chemin vers le fichier contenant le graphe a lire.
      */
-    graphe(string cheminVersFichier);
+    graphe(const string cheminVersFichier);
 
     /**
      * Destructeur. Va fermer le fichier contenant le graphe.
@@ -106,7 +106,7 @@ class graphe
      * S'il n'est pas en mémoire, ce dernier va être lu.
      * @param noeud numéro du noeud a afficher.
      */
-    void afficher_noeud(uint32_t noeud);
+    void afficher_noeud(const uint32_t noeud);
 
     /**
      * Trouve et affiche le chemin le plus optimal entre les 2 noeuds.

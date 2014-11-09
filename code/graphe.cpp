@@ -6,7 +6,10 @@
 #include <vector>
 #include <deque>
 
-graphe::graphe(string cheminVersFichier)
+#define __LITTLE_ENDIAN 1234
+#define __BIG_ENDIAN    4321
+
+graphe::graphe(const string cheminVersFichier)
 {
 	DATA.open(cheminVersFichier.c_str(), ios::in|ios::binary);
 
@@ -17,13 +20,12 @@ graphe::graphe(string cheminVersFichier)
 
 	DATA >> nom >> nbNOEUDS >> architecture;
 	DATA.ignore(1);
-
 	DEBUT = DATA.tellg();
 }
 
 graphe::~graphe()
 {
-	// Fermer le fichier a la sortie du programme.
+	// Fermer le fichier à la sortie du programme.
 	if (DATA.is_open()) {
 		DATA.close();
 	}
@@ -53,6 +55,7 @@ void graphe::lire_noeud(uint32_t noeud)
 				this->lire(lesNoeuds[noeud].liens[numero]);
 		  }
 
+			// Lecture du nom du noeud
 			uint16_t nombreDeCaracteres;
 			this->lire(nombreDeCaracteres);
 
@@ -100,7 +103,8 @@ void graphe::lire(float& a)
 	int architectureMachine = this->architectureMachine();
 	if((architecture == 1 && architectureMachine != __LITTLE_ENDIAN) ||
 		(architecture == 0 && architectureMachine != __BIG_ENDIAN)) {
-			char *floatToConvert = ( char* ) & a; // http://stackoverflow.com/a/2782742
+			char *floatToConvert = ( char* ) & a;
+			// http://stackoverflow.com/a/2782742
 			swap(floatToConvert[0], floatToConvert[3]);
 			swap(floatToConvert[1], floatToConvert[2]);
 	}
@@ -111,7 +115,7 @@ const uint32_t graphe::size() const
 	return this->nbNOEUDS;
 }
 
-void graphe::afficher_noeud(uint32_t noeud)
+void graphe::afficher_noeud(const uint32_t noeud)
 {
 	this->lire_noeud(noeud);
 
@@ -235,8 +239,9 @@ void graphe::afficher_chemin(map<uint32_t, uint32_t>& predecesseurs, const uint3
 			cout << " | Poids du lien : " << ptrNoeudPrecedent->liens[cheminNormal[i]] << endl;
 		}
 
+		// Le noeud courant devient le noeud précédent dans la prochaine exécution
 		ptrNoeudPrecedent = ptrNoeudCourant;
 	}
-	cout << " #-------------------------------------------------------------------------" << endl;
+	cout << "--------------------------------------------------------------------------" << endl;
 	cout << " - Poids total du chemin le plus court : " << poidsTotal << endl;
 }

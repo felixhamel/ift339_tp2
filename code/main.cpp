@@ -34,7 +34,7 @@ int main()
     }
 
     cout << "Trouver le chemin entre le premier noeud " << premierNoeud;
-    cout << " et le deuxieme " << secondNoeud << " : " << endl << endl;
+    cout << " et le deuxieme " << secondNoeud << " : " << endl;
 
     dijkstra.trouver_chemin_optimal(premierNoeud, secondNoeud);
   }
