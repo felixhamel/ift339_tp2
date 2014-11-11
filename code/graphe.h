@@ -8,6 +8,11 @@
 
 using namespace std;
 
+#define ___LITTLE_ENDIAN 1
+#define ___BIG_ENDIAN    0
+
+extern uint8_t architectureMachine;
+
 class graphe
 {
   private:
@@ -60,19 +65,12 @@ class graphe
     /**
      * Constructeur par copie.
      */
-    //graphe(const graphe &graphe)=delete;
+    graphe(const graphe &graphe)=delete;
 
     /**
      * Désactiver l'opérateur =. Il vaut mieux utiliser le constructeur par copie.
      */
-    //graphe& operator=(const graphe &graphe)=delete;
-
-    /**
-     * Vérifie quel est l'architecture de la machine exécutant ce code.
-     * Trouvé sur : http://stackoverflow.com/a/1001344
-     * @return int 4321 = BigEndian, 1234 = LittleEndian.
-     */
-    const int architectureMachine() const;
+    graphe& operator=(const graphe &graphe)=delete;
 
     /**
      * Afficher le chemin trouvé.
