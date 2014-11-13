@@ -11,6 +11,12 @@ Voir l'énoncé pour plus de détails.
 
 
 Équipe
-==
+----
  - Félix Hamel
  - Fanny Rancourt
+
+License
+----
+Voir fichier LICENCE
+
+Université de Sherbrooke, Faculté des sciences, 2014
