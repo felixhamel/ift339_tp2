@@ -8,3 +8,9 @@ Pour accéder à la partie 1 du TP, allez sur la branche nommée partie1.
 Université de Sherbrooke - Automne 2014.
 
 Voir l'énoncé pour plus de détails.
+
+
+Équipe
+==
+ - Félix Hamel
+ - Fanny Rancourt
